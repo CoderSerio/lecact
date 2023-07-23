@@ -23,7 +23,10 @@ export const getPackageJSON = (pkgName) => {
 };
 
 export const getBaseRollupPlugins = ({
-	alias = { __DEV__: true },
+	alias = {
+		__DEV__: true,
+		preventAssignment: true
+	},
 	tsConfig = {}
 }) => {
 	return [replace(alias), cjs(), ts(tsConfig)];

@@ -1,15 +1,19 @@
 {
-	"name": "react",
+	"name": "react-dom",
 	"version": "1.0.0",
 	"description": "",
 	"module": "index.ts",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"keywords": [],
 	"dependencies": {
-		"shared": "workspace:*"
+		"shared": "workspace:*",
+		"react-reconciler": "workspace:*"
 	},
+	"peerDependencies": {
+		"react": "workspace:*"
+	},
+	"keywords": [],
 	"author": "",
 	"license": "ISC"
 }
