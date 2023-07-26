@@ -5,22 +5,24 @@ import { processUpdateQueue, UpdateQueue } from './updateQueue';
 import { HostComponent, HostRoot, HostText } from './workTags';
 
 function updateHostRoot(wip: FiberNode) {
-	const baseState = wip.memorizedState;
+	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
 	const pending = updateQueue.shared.pending;
 	updateQueue.shared.pending = null;
-	const { memorizedState } = processUpdateQueue(baseState, pending);
-
+	const { memoizedState } = processUpdateQueue(baseState, pending);
+	wip.memoizedState = memoizedState;
 	// 获取子 ReactElement 和 子 fiberNode 并进行对比，然后生成新的 fiberNode
-	const nextChildren = wip.memorizedState;
+	const nextChildren = wip.memoizedState;
 	reconcileChildren(wip, nextChildren);
 	return wip.child;
 }
 
-// HostComponent 中是无法触发更新的
+// HostComponent 中是无法触发更新的——因为不是组件
 function updateHostComponent(wip: FiberNode) {
+	// 为什么获取的是props, 比如对于 <div><span/></div>
+	// span 是在 div 对应的 fiber 的 props.children 中的
 	const nextProps = wip.pendingProps;
-	const nextChildren = wip.memorizedState;
+	const nextChildren = nextProps.children;
 	reconcileChildren(wip, nextChildren);
 	return wip.child;
 }
@@ -40,16 +42,18 @@ function reconcileChildren(wip: FiberNode, children?: ReactElement) {
 	if (current !== null) {
 		// 存在 current fiberNode 树，是 update 流程
 		// 不会存在大量的插入操作
-		wip.child = reconcileChildFibers(wip, current?.child, children);
+		wip.child = reconcileChildFibers(wip, current?.child, children) as any;
 	} else {
 		// 不存在， 则是 mount 流程
 		// 存在大量的插入操作
-		wip.child = mountChildFibers(wip, null, children);
+		wip.child = mountChildFibers(wip, null, children) as any;
 	}
 	return null;
 }
 
-/** 递归消费JSX的 递 阶段，需要做两件事：
+/**
+ * 对子节点做更新
+ * 递归消费JSX的 递 阶段，需要做两件事：
  *
  * 1. 比较节点的 ReactElement 和 FiberNode, 计算最新值
  * 2. 返回 子fiberNode
@@ -62,6 +66,7 @@ export function beginWork(wip: FiberNode) {
 		case HostComponent:
 			return updateHostComponent(wip);
 		case HostText:
+			// 文本不可能有子节点，所以直接不用处理
 			return null;
 		// return updateHostText(wip);
 		default:

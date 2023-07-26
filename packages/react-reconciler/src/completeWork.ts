@@ -10,20 +10,19 @@ import { HostComponent, HostRoot, HostText } from './workTags';
 
 /**
  * 构建一个离屏的 DOM 树，将其插入 parent 中
- *
+ * 我们要插入的是节点的child
+ * 因为节点本身长这样： <A><B/></A>没错，B确实是A的子节点，但是要被插入的是B的内容
+ * 甚至可能更复杂，A有多个子节点————这就是为什么叫 appendAllChildren
  * 这里做了一个优化：插入n个单节点 -> 组合成树插入一次
  *
  * 向下和向右(找兄弟节点)遍历，
  * 然后同时不断地建立 return 和 sibling 关系
  */
 function appendAllChildren(parent: Container, wip: FiberNode) {
-	// 我们要插入的是节点的child
-	// 因为节点本身长这样： <App><div>没错，child才是我们预期的内容</div></App>
 	let node = wip.child;
-
 	while (node !== null) {
 		if (node.tag === HostComponent || node.tag === HostText) {
-			appendInitialChild(parent, node?.stateNode);
+			appendInitialChild(node?.stateNode, parent);
 		} else if (node?.child !== null) {
 			// 向下找子节点
 			node.child.return = node;
@@ -32,7 +31,6 @@ function appendAllChildren(parent: Container, wip: FiberNode) {
 		}
 
 		if (node === wip) {
-			// 最后向上回到了起点，结束
 			return;
 		}
 

@@ -9,18 +9,17 @@ export const createInstance = (type: string) => {
 };
 
 export const appendInitialChild = (
-	parent: Instance | Container,
-	child: Instance
+	child: Instance,
+	parent: Instance | Container
 ) => {
-	parent.appendChild(child);
+	parent?.appendChild(child);
 };
 
-export const appendChildToContainer = (
-	child: Instance,
-	container: Container
-) => {
-	container.appendChild(child);
-};
+/** 插入 DOM 节点插入
+ * 浏览器下等价于 parentDom.appendChild()
+ * appendInitialChild 方法的实现与这个方法完全一样
+ */
+export const appendChildToContainer = appendInitialChild;
 
 export const createTextInstance = (content: string) => {
 	return document.createTextNode(content);

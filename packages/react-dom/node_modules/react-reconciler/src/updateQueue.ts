@@ -1,3 +1,6 @@
+/*
+	这个文件也就是 创建 update 和 updateQueue， 以及更新 updateQueue 的方法（入队、出队）
+*/
 import { Action } from 'shared/ReactTypes';
 
 export interface Update<State> {
@@ -36,6 +39,8 @@ export function createUpdateQueue<State>(): UpdateQueue<State> {
 
 /**
  * 为 updateQUeue 增加 update 对象的方法
+ *
+ * TODO: 采用尾插法
  */
 export function enqueueUpdate<State>(
 	updateQueue: UpdateQueue<State>,
@@ -45,25 +50,27 @@ export function enqueueUpdate<State>(
 }
 
 /** 消耗 update 的方法，有两种情况：
- * 1. baseState 为 1， update 为 2，那么 memorizedState 就是 2
- * 2. baseState 为 1, update 为 (x) => 2 * x，那么memorizedState 就是 2 * x 即 2
+ * 1. baseState 为 1， update 为 2，那么 memoizedState 就是 2
+ * 2. baseState 为 1, update 为 (x) => 2 * x，那么memoizedState 就是 2 * x 即 2
  *
- * 返回值就是 memorizedState，也就是更新完成后的状态
+ * 返回值就是 memoizedState，也就是更新完成后的状态
  */
 export function processUpdateQueue<State>(
 	baseState: State,
 	pendingUpdate: Update<State> | null
-): { memorizedState: State } {
-	const result: ReturnType<typeof processUpdateQueue<State>> = {
-		memorizedState: baseState
+): { memoizedState: State } {
+	type Type = typeof processUpdateQueue<State>;
+	const result: ReturnType<Type> = {
+		memoizedState: baseState
 	};
 
 	if (pendingUpdate !== null) {
 		const action = pendingUpdate.action;
 		if (action instanceof Function) {
-			result.memorizedState = action(baseState);
+			// 处理直接传一个函数的作为新状态的情况
+			result.memoizedState = action(baseState);
 		} else {
-			result.memorizedState = action;
+			result.memoizedState = action;
 		}
 	}
 

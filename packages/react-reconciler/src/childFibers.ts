@@ -41,7 +41,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 	};
 
 	/** 相当于协调的 main 函数，判断不同的类型，选择不同的协调方法 */
-	return function reconcileChildrenFibers(
+	function reconcileChildrenFibers(
 		parentFiber: FiberNode,
 		currentFiber: FiberNode | null,
 		newChild?: ReactElement
@@ -59,7 +59,6 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 					if (__DEV__) {
 						console.warn('未实现的reconcile类型', newChild);
 					}
-					break;
 			}
 		}
 
@@ -74,9 +73,11 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 
 		if (__DEV__) {
 			console.warn('未实现的类型', newChild);
+			return;
 		}
 		return null;
-	};
+	}
+	return reconcileChildrenFibers;
 }
 
 /** 和 mountChildFibers 类似，但是会追踪副作用 */

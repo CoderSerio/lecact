@@ -25,15 +25,15 @@ export class FiberNode {
 	index: number;
 	ref: Ref;
 
-	memorizedProps: Props | null;
-	memorizedState: any;
+	memoizedProps: Props | null;
+	memoizedState: any;
 	alternate: FiberNode | null;
 	flags: Flags;
 	subtreeFlags: Flags;
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
-		// 以下是记录实例相关的属性
+		// 以下是记录实例相关的属性，也就是 ReactElement 也具有的部分
 		this.tag = tag;
 		/** diff的键 */
 		this.key = key;
@@ -49,7 +49,7 @@ export class FiberNode {
 		this.sibling = null;
 		// 子节点
 		this.child = null;
-		// 子节点的下标
+		// 作为子节点，在父级节点的子节点list中的下标
 		this.index = 0;
 		// 对自身的引用
 		this.ref = null;
@@ -58,9 +58,9 @@ export class FiberNode {
 		// 工作单元刚开始的时候的props
 		this.pendingProps = pendingProps;
 		// 更新完了之后的 props
-		this.memorizedProps = null;
+		this.memoizedProps = null;
 		// 更新完了之后的 state
-		this.memorizedState = null;
+		this.memoizedState = null;
 		// workInProgress 和 current 树的节点相互指向
 		this.alternate = null;
 		// 副作用标签
@@ -103,23 +103,25 @@ export function createWorkInProgress(
 	pendingProps: Props
 ): FiberNode {
 	// workInProgress 的缩写
-	let wip;
+	let wip = current.alternate;
 	if (wip === null) {
+		// 传入的是 ReactElement 具有的基本属性，其余属性自己手动赋值
 		wip = new FiberNode(current.tag, pendingProps, current.key);
-		wip.type = current.type;
-		wip.stateNode = current;
 
+		wip.stateNode = current.stateNode;
 		wip.alternate = current;
-		current.alternate = pendingProps;
-
+		current.alternate = wip;
+	} else {
 		// alternate 的过程：
-		// 清除副作用，因为它们可能是上一次更新遗留下来的
+		// 清除缓存（副作用和参数），因为它们可能是上一次更新遗留下来的
 		wip.flags = NoFlags;
-		wip.updateQueue = current.updateQueue;
-		wip.child = current.child;
-		wip.memorizedProps = current.memorizedProps;
-		wip.memorizedState = current.memorizedState;
+		wip.pendingProps = pendingProps;
 	}
+	wip.type = current.type;
+	wip.memoizedState = current.memoizedState;
+	wip.memoizedProps = current.memoizedProps;
+	wip.updateQueue = current.updateQueue;
+	wip.child = current.child;
 	return wip as FiberNode;
 }
 

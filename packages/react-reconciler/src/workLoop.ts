@@ -20,13 +20,14 @@ function completeUnitOfWork(fiber: FiberNode) {
 			return;
 		}
 		node = node.return as FiberNode;
+		workInProgress = node;
 	} while (node !== null);
 }
 
 /** 访问下一个 fiberNode，有子节点遍历子节点；没有子节点则遍历兄弟节点 */
 function performUnitOfWork(fiber: FiberNode) {
 	const next = beginWork(fiber);
-	fiber.memorizedProps = fiber.pendingProps;
+	fiber.memoizedProps = fiber.pendingProps;
 
 	if (next === null) {
 		// 子节点遍历结束，开始遍历兄弟节点
@@ -43,7 +44,9 @@ function workLoop() {
 	}
 }
 
-/** 初始化，指向需要遍历的第一个 fiberRootNode
+/**
+ * 准备新的堆栈
+ * 初始化，指向需要遍历的第一个 fiberRootNode
  *  也就是即将开始计算生成 fiber树——即初始化 workInProgress fiber 树
  */
 function prepareFreshStack(fiberRootNode: FiberRootNode) {
@@ -134,8 +137,8 @@ function renderRoot(fiberRootNode: FiberRootNode) {
 	} while (true);
 
 	// 计算完成后的 workInProgress fiber 树
-	const finishedWip = fiberRootNode.current.alternate;
-	fiberRootNode.finishedWork = finishedWip;
+	const finishedWork = fiberRootNode.current.alternate;
+	fiberRootNode.finishedWork = finishedWork;
 	// 执行具体的操作
 	commitRoot(fiberRootNode);
 }

@@ -54,22 +54,18 @@ const getHostParent = (fiber: FiberNode) => {
 
 /** 处理 Placement，插入操作 */
 const commitPlacement = (finishedWork: FiberNode) => {
-	//
 	if (__DEV__) {
 		console.log('执行Placement操作', finishedWork);
 	}
 
 	/** 原生父级 DOM */
 	const hostParent = getHostParent(finishedWork) as Container;
-	if (hostParent !== null) {
-		appendPlacementNodeIntoContainer(finishedWork, hostParent);
-	}
+	appendPlacementNodeIntoContainer(finishedWork, hostParent);
 };
 
 /** 具体地开始处理 MutationMask 中的每一种 */
 const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 	const flags = finishedWork.flags;
-
 	if ((flags & Placement) !== NoFlags) {
 		commitPlacement(finishedWork);
 		// 将已经被处理的状态移除掉
@@ -82,7 +78,7 @@ export const commitMutationEffects = (finishedWork: FiberNode) => {
 	nextEffect = finishedWork;
 
 	while (nextEffect !== null) {
-		const child: FiberNode | null = nextEffect.child;
+		const child: FiberNode | null = nextEffect?.child ?? null;
 
 		if (
 			(nextEffect.subtreeFlags & MutationMask) !== NoFlags &&
